@@ -1,0 +1,12 @@
+name: bno055-usb-stick
+
+dependencies:
+  - python=3.6
+  - pyserial
+  - numpy
+  - ipython
+  - pip
+  - pip:
+    - pyquaternion
+    - pyudev
+
