@@ -35,10 +35,17 @@ class BnoUsbStick:
 
     @staticmethod
     def read_bno_json_config(file):
+        if not file:
+            raise BnoException("BNO JSON config file not specified!")
         current_dir = os.path.dirname(os.path.abspath(__file__))
         bno_file_abspath = os.path.join(current_dir, file)
         with open(bno_file_abspath) as f:
-            return json.load(f)
+            config = json.load(f)
+        for section in config:
+            if section in ["bno055_page_0", "bno055_page_1"]:
+                for reg_name, reg_addr in config[section].items():
+                    config[section][reg_name] = int(reg_addr, 16)
+        return config
 
     @staticmethod
     def find_entry_idx(params, description):
@@ -122,7 +129,7 @@ class BnoUsbStick:
         print(info_str)
 
     def query_board_info(self):
-        """ask for board information, hw / sw id"""
+        """ask for board information, shuttle /hw / sw id"""
         command = bytearray(self.bno_config['board_information']['command'])
         params = self.bno_config['board_information']['params']
         ok, resp = self.send_recv(command, params)
@@ -131,18 +138,20 @@ class BnoUsbStick:
         self.decode_board_info()
 
     def check_packet(self, packet: bytes) -> bool:
-        """check start and stop packet bytes"""
+        """check start and stop packet bytes, error byte, and status"""
         assert packet[0] == 0xAA, f"Invalid start byte, expected 0xAA, got {packet[0]}"
         assert packet[-2] == 0x0D, f"Invalid stop byte, expected 0x0D, got{packet[-2]}"
         assert packet[-1] == 0x0A, f"Invalid stop byte, expected 0x0A, got{packet[-1]}"
+        error_status = packet[3]
+        assert error_status == 0 or error_status == 2, f"Invalid error status flag, got {error_status}"
+        response_code = packet[4]
+        assert response_code == 66 or response_code == 65, f"Invalid response code, got {response_code}"
         return True
 
     def decode_register_read(self):
         """extract payload, the received packet is stored in buffer"""
-        self.check_packet(self.buffer)
-        error_status = self.buffer[3]
-        response_code = self.buffer[4]
-        if (response_code == 66 or response_code == 65) and (error_status == 0 or error_status == 2):
+        check_ok = self.check_packet(self.buffer)
+        if check_ok:
             return self.buffer[11]
         else:
             return None
@@ -161,11 +170,8 @@ class BnoUsbStick:
     def decode_register_write(self, reg_addr, reg_value):
         """check that register response is OK"""
         self.check_packet(self.buffer)
-        error_status = self.buffer[3]
-        response_code = self.buffer[4]
-        if (response_code == 66 or response_code == 65) and (error_status == 0 or error_status == 2):
-            if self.buffer[7] == reg_addr and self.buffer[11] == reg_value:
-                return True
+        if self.buffer[7] == reg_addr and self.buffer[11] == reg_value:
+            return True
         return False
 
     def write_register(self, reg_addr, reg_value):
@@ -180,6 +186,47 @@ class BnoUsbStick:
         if not ok:
             raise BnoException("Command sent failed!")
         return self.decode_register_write(reg_addr, reg_value)
+
+    def get_addr_str(self, addr: int) -> str:
+        config_map = self.bno_config['bno055_page_0']
+        for key, val in config_map.items():
+            if val == addr:
+                return key
+        else:
+            return ''
+
+    def decode_burst_read(self, start_reg_addr, num_bytes):
+        self.check_packet(self.buffer)
+        self.payload = self.buffer[11:-2]
+        reg_name = self.get_addr_str(start_reg_addr)
+        bytes_processed = 0
+        result = []
+        while bytes_processed < num_bytes:
+            if 'LSB' in reg_name:
+                val = self.pop_bytes(2, byteorder='little', signed=True)
+                bytes_processed += 2
+            else:
+                val = self.pop_bytes(1)
+                bytes_processed += 1
+            result.append((reg_name, val))
+            reg_name = self.get_addr_str(start_reg_addr + bytes_processed)
+        return result
+
+    def burst_read(self, start_reg_addr, num_bytes):
+        num_bytes_msb = (num_bytes >> 8) & 0xFF
+        num_bytes_lsb = num_bytes & 0xFF
+        command = self.bno_config['burst_read']['command']
+        params = self.bno_config['burst_read']['params']
+        reg_addr_entry_idx = self.find_entry_idx(params, 'start_reg_addr')
+        params[reg_addr_entry_idx]['val'] = start_reg_addr
+        msb_entry_idx = self.find_entry_idx(params, 'num_bytes_msb')
+        params[msb_entry_idx]['val'] = num_bytes_msb
+        lsb_entry_idx = self.find_entry_idx(params, 'num_bytes_lsb')
+        params[lsb_entry_idx]['val'] = num_bytes_lsb
+        ok, _ = self.send_recv(command, params)
+        if not ok:
+            raise BnoException("Command sent failed!")
+        return self.decode_burst_read(start_reg_addr, num_bytes)
 
 
 def test_register_content(bno: BnoUsbStick, reg_address: int, expected_value: int, err_message: str):
@@ -209,3 +256,4 @@ if __name__ == "__main__":
     print(f"r_04: 0x{bno_usb_stick.read_register(0x04):02X}")
     check_bno_chip_id(bno_usb_stick)
     print(bno_usb_stick.write_register(0x3D, 0x0C))
+    print(bno_usb_stick.burst_read(0x00, 20))
