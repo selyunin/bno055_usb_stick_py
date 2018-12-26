@@ -58,11 +58,12 @@ class BnoUsbStick:
                 raise BnoException("BNO USB Stick not detected!")
 
     def connect(self):
-        self.port = serial.Serial()
-        self.port.port = self.port_name
-        for key, value in self.bno_config['serial'].items():
-            setattr(self.port, key, value)
-        self.port.open()
+        if self.port is None or not self.port.is_open:
+            self.port = serial.Serial()
+            self.port.port = self.port_name
+            for key, value in self.bno_config['serial'].items():
+                setattr(self.port, key, value)
+            self.port.open()
 
     def disconnect(self):
         self.port.close()
@@ -103,8 +104,8 @@ class BnoUsbStick:
             raise BnoException("Receiving packet failed!")
         return True, recv_data
 
-    def pop_bytes(self, num_bytes=2, **kwargs):
-        val = int.from_bytes(self.payload[0:num_bytes], byteorder='big', **kwargs)
+    def pop_bytes(self, num_bytes=2, byteorder='big', **kwargs):
+        val = int.from_bytes(self.payload[0:num_bytes], byteorder=byteorder, **kwargs)
         self.payload = self.payload[num_bytes:]
         return val
 
@@ -121,6 +122,7 @@ class BnoUsbStick:
         print(info_str)
 
     def query_board_info(self):
+        """ask for board information, hw / sw id"""
         command = bytearray(self.bno_config['board_information']['command'])
         params = self.bno_config['board_information']['params']
         ok, resp = self.send_recv(command, params)
@@ -129,12 +131,14 @@ class BnoUsbStick:
         self.decode_board_info()
 
     def check_packet(self, packet: bytes) -> bool:
+        """check start and stop packet bytes"""
         assert packet[0] == 0xAA, f"Invalid start byte, expected 0xAA, got {packet[0]}"
         assert packet[-2] == 0x0D, f"Invalid stop byte, expected 0x0D, got{packet[-2]}"
         assert packet[-1] == 0x0A, f"Invalid stop byte, expected 0x0A, got{packet[-1]}"
         return True
 
     def decode_register_read(self):
+        """extract payload, the received packet is stored in buffer"""
         self.check_packet(self.buffer)
         error_status = self.buffer[3]
         response_code = self.buffer[4]
@@ -144,6 +148,7 @@ class BnoUsbStick:
             return None
 
     def read_register(self, reg_addr):
+        """read single register of the BNO"""
         command = self.bno_config['read_register']['command']
         params = self.bno_config['read_register']['params']
         entry_idx = self.find_entry_idx(params, 'reg_addr')
@@ -154,6 +159,7 @@ class BnoUsbStick:
         return self.decode_register_read()
 
     def decode_register_write(self, reg_addr, reg_value):
+        """check that register response is OK"""
         self.check_packet(self.buffer)
         error_status = self.buffer[3]
         response_code = self.buffer[4]
@@ -163,6 +169,7 @@ class BnoUsbStick:
         return False
 
     def write_register(self, reg_addr, reg_value):
+        """writing single register of the BNO"""
         command = self.bno_config['write_register']['command']
         params = self.bno_config['write_register']['params']
         reg_addr_entry_idx = self.find_entry_idx(params, 'reg_addr')
@@ -176,6 +183,7 @@ class BnoUsbStick:
 
 
 def test_register_content(bno: BnoUsbStick, reg_address: int, expected_value: int, err_message: str):
+    """check whether register content match expected value"""
     reg_value = bno.read_register(reg_address)
     if reg_value != expected_value:
         raise BnoException("Expected: {:02X}, Got{:02X}\n{}".format(expected_value, reg_value, err_message))
@@ -183,7 +191,7 @@ def test_register_content(bno: BnoUsbStick, reg_address: int, expected_value: in
 
 
 def check_bno_chip_id(bno: BnoUsbStick):
-    """Chip ID, fixed value 0xA0"""
+    """BNO chip ID, fixed value 0xA0"""
     reg_addr = 0x00
     expected_value = 0xA0
     reg_value = test_register_content(bno, reg_addr, expected_value, "Reading BNO Chip ID failed!")
