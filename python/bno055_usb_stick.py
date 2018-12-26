@@ -27,6 +27,11 @@ class BnoUsbStick:
         self.payload = None
         self.bno_udev_config = self.bno_config['udev']
         self.buffer_size = 1024
+        if kwargs.get('port') is not None:
+            self.port_name = kwargs.get('port')
+        else:
+            self.autodetect()
+        self.connect()
 
     @staticmethod
     def read_bno_json_config(file):
@@ -138,8 +143,6 @@ class BnoUsbStick:
         else:
             return None
 
-
-
     def read_register(self, reg_addr):
         command = self.bno_config['read_register']['command']
         params = self.bno_config['read_register']['params']
@@ -150,8 +153,14 @@ class BnoUsbStick:
             raise BnoException("Command sent failed!")
         return self.decode_register_read()
 
-    def decode_register_write(self):
-        pass
+    def decode_register_write(self, reg_addr, reg_value):
+        self.check_packet(self.buffer)
+        error_status = self.buffer[3]
+        response_code = self.buffer[4]
+        if (response_code == 66 or response_code == 65) and (error_status == 0 or error_status == 2):
+            if self.buffer[7] == reg_addr and self.buffer[11] == reg_value:
+                return True
+        return False
 
     def write_register(self, reg_addr, reg_value):
         command = self.bno_config['write_register']['command']
@@ -163,7 +172,7 @@ class BnoUsbStick:
         ok, _ = self.send_recv(command, params)
         if not ok:
             raise BnoException("Command sent failed!")
-        return self.decode_register_write()
+        return self.decode_register_write(reg_addr, reg_value)
 
 
 def test_register_content(bno: BnoUsbStick, reg_address: int, expected_value: int, err_message: str):
@@ -184,9 +193,11 @@ def check_bno_chip_id(bno: BnoUsbStick):
 if __name__ == "__main__":
     # example client code
     bno_usb_stick = BnoUsbStick()
-    bno_usb_stick.autodetect()
-    bno_usb_stick.connect()
     bno_usb_stick.query_board_info()
-    bno_usb_stick.read_register(0x01)
+    print(f"r_00: 0x{bno_usb_stick.read_register(0x00):02X}")
+    print(f"r_01: 0x{bno_usb_stick.read_register(0x01):02X}")
+    print(f"r_02: 0x{bno_usb_stick.read_register(0x02):02X}")
+    print(f"r_03: 0x{bno_usb_stick.read_register(0x03):02X}")
+    print(f"r_04: 0x{bno_usb_stick.read_register(0x04):02X}")
     check_bno_chip_id(bno_usb_stick)
-    bno_usb_stick.write_register(0x3D, 0x0C)
+    print(bno_usb_stick.write_register(0x3D, 0x0C))
