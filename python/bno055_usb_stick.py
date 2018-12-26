@@ -35,6 +35,11 @@ class BnoUsbStick:
         with open(bno_file_abspath) as f:
             return json.load(f)
 
+    @staticmethod
+    def find_entry_idx(params, description):
+        reg_addr_entry = next(filter(lambda x: x['description'] == description, params))
+        return params.index(reg_addr_entry)
+
     def autodetect(self):
         context = pyudev.Context()
         for device in context.list_devices(subsystem='tty'):
@@ -118,20 +123,62 @@ class BnoUsbStick:
             raise BnoException("Command sent failed!")
         self.decode_board_info()
 
-    def decode_register_read(self):
+    def check_packet(self, packet: bytes) -> bool:
+        assert packet[0] == 0xAA, f"Invalid start byte, expected 0xAA, got {packet[0]}"
+        assert packet[-2] == 0x0D, f"Invalid stop byte, expected 0x0D, got{packet[-2]}"
+        assert packet[-1] == 0x0A, f"Invalid stop byte, expected 0x0A, got{packet[-1]}"
+        return True
 
-        return None
+    def decode_register_read(self):
+        self.check_packet(self.buffer)
+        error_status = self.buffer[3]
+        response_code = self.buffer[4]
+        if (response_code == 66 or response_code == 65) and (error_status == 0 or error_status == 2):
+            return self.buffer[11]
+        else:
+            return None
+
+
 
     def read_register(self, reg_addr):
         command = self.bno_config['read_register']['command']
         params = self.bno_config['read_register']['params']
-        reg_addr_entry = next(filter(lambda x: x['description'] == 'reg_addr', params))
-        reg_entry_idx = params.index(reg_addr_entry)
-        params[reg_entry_idx]['val'] = reg_addr
-        ok, resp = self.send_recv(command, params)
+        entry_idx = self.find_entry_idx(params, 'reg_addr')
+        params[entry_idx]['val'] = reg_addr
+        ok, _ = self.send_recv(command, params)
         if not ok:
             raise BnoException("Command sent failed!")
         return self.decode_register_read()
+
+    def decode_register_write(self):
+        pass
+
+    def write_register(self, reg_addr, reg_value):
+        command = self.bno_config['write_register']['command']
+        params = self.bno_config['write_register']['params']
+        reg_addr_entry_idx = self.find_entry_idx(params, 'reg_addr')
+        params[reg_addr_entry_idx]['val'] = reg_addr
+        reg_value_entry_idx = self.find_entry_idx(params, 'reg_val')
+        params[reg_value_entry_idx]['val'] = reg_value
+        ok, _ = self.send_recv(command, params)
+        if not ok:
+            raise BnoException("Command sent failed!")
+        return self.decode_register_write()
+
+
+def test_register_content(bno: BnoUsbStick, reg_address: int, expected_value: int, err_message: str):
+    reg_value = bno.read_register(reg_address)
+    if reg_value != expected_value:
+        raise BnoException("Expected: {:02X}, Got{:02X}\n{}".format(expected_value, reg_value, err_message))
+    return reg_value
+
+
+def check_bno_chip_id(bno: BnoUsbStick):
+    """Chip ID, fixed value 0xA0"""
+    reg_addr = 0x00
+    expected_value = 0xA0
+    reg_value = test_register_content(bno, reg_addr, expected_value, "Reading BNO Chip ID failed!")
+    print("Reading BNO Chip ID successful, got 0x{:02X}".format(reg_value))
 
 
 if __name__ == "__main__":
@@ -141,3 +188,5 @@ if __name__ == "__main__":
     bno_usb_stick.connect()
     bno_usb_stick.query_board_info()
     bno_usb_stick.read_register(0x01)
+    check_bno_chip_id(bno_usb_stick)
+    bno_usb_stick.write_register(0x3D, 0x0C)
