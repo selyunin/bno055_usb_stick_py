@@ -172,13 +172,21 @@
     "expected_value": "0XA0"
   },
   "board_information": {
-    "command": [170, 7, 2, 31, 13, 10, 0],
-    "parameters": {},
+    "command": [170, 7, 2, 31, 13, 10],
+    "params": {},
     "response": {
       "shuttle_id": { "idx": 6, "len": 2},
       "hardware_id": { "idx": 8, "len": 2},
       "software_id": { "idx": 10, "len": 2},
       "board_type": { "idx": 12, "len": 1}
     }
-  }
+  },
+  "read_register": {
+    "command": [170, 19, 2, 22, 2, 0, 1, 0, 0, "BNO_I2C_ADDR", "REG_ADDR", 0, 1, 1, 0, 1, 13, 10, 0],
+    "params": [
+      { "idx": 9, "len": 1, "val": 40, "description": "bno_i2c_addr"},
+      { "idx": 10, "len": 1, "val": 0, "description": "reg_addr"}
+    ]
+  },
+  "i2c_addr": "0x28"
 }
