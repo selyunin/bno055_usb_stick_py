@@ -244,8 +244,6 @@ class BnoUsbStick:
         """
         if len(self.buffer) != 0x38:
             raise BnoException(f"Streaming packet length does not match, expected: 0x38, got {len(self.buffer)}")
-        if len(self.buffer) == 0x38:
-            print("got exactly one packet!")
         start_byte = 0xAA
         stop_bytes = bytes([13, 10])
         packet_start_idx = self.buffer.find(start_byte)
@@ -255,7 +253,16 @@ class BnoUsbStick:
         if packet_stop_idx == -1:
             raise BnoException("Stop bytes of streaming packet not found")
 
-    def recv_streaming(self, num_packets=-1):
+    def recv_streaming_packet(self):
+        """
+        Receive and decode single streaming packet.
+        :return: BNO055 dataclass
+        """
+        ok, _ = self.recv()
+        self.check_streaming_packet()
+        return self.decode_streaming()
+
+    def recv_streaming_generator(self, num_packets=-1):
         """
         Receive and decode `num_packets` streaming packets.
         :param num_packets: number of packets to receive / decode.
@@ -264,11 +271,9 @@ class BnoUsbStick:
         """
         packets_received = 0
         while num_packets == -1 or packets_received < num_packets:
-            ok, _ = self.recv()
-            self.check_streaming_packet()
-            # return self.decode_streaming()
-            yield self.decode_streaming()
+            yield self.recv_streaming_packet()
             packets_received += 1
+
 
     def decode_streaming(self):
         self.payload = self.buffer[5:-2]
@@ -345,9 +350,7 @@ class BnoUsbStick:
         commands_sequence = self.bno_config['start_streaming']
         for command in commands_sequence:
             params = {}
-            # print(f"sent: {command}")
             ok, _ = self.send_recv(bytearray(command), params)
-            # print(f"received: {_}")
 
     def deactivate_streaming(self):
         commands_sequence = self.bno_config['stop_streaming']
@@ -389,5 +392,7 @@ if __name__ == "__main__":
     print(bno_usb_stick.write_register(0x3D, 0x0C))
     print(bno_usb_stick.burst_read(0x00, 30))
     bno_usb_stick.activate_streaming()
-    for packet in bno_usb_stick.recv_streaming(num_packets=10):
+    print(bno_usb_stick.recv_streaming_packet())
+    print('generator\n================')
+    for packet in bno_usb_stick.recv_streaming_generator(num_packets=10):
         print(packet)
