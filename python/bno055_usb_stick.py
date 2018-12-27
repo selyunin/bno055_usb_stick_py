@@ -383,7 +383,6 @@ if __name__ == "__main__":
     # example client code
     bno_usb_stick = BnoUsbStick()
     bno_usb_stick.deactivate_streaming()
-
     bno_usb_stick.query_board_info()
     print(f"r_00: 0x{bno_usb_stick.read_register(0x00):02X}")
     print(f"r_01: 0x{bno_usb_stick.read_register(0x01):02X}")
