@@ -240,7 +240,8 @@ class BnoUsbStick:
         """
         Check that streaming packet has length 0x38, start byte 0xAA,
         and stop bytes 0x0D,0x0A
-        :return:
+        :return: True if everything is OK
+        :raises: BnoException if packet length, start, or stop bytes are not met
         """
         if len(self.buffer) != 0x38:
             raise BnoException(f"Streaming packet length does not match, expected: 0x38, got {len(self.buffer)}")
@@ -252,6 +253,7 @@ class BnoUsbStick:
             raise BnoException("Start byte of streaming packet not found")
         if packet_stop_idx == -1:
             raise BnoException("Stop bytes of streaming packet not found")
+        return True
 
     def recv_streaming_packet(self):
         """
