@@ -2,7 +2,7 @@
 
 **TL;DR:** *"Swiss army knife"* for using 
 [`BNO055 USB Stick`](https://eu.mouser.com/new/bosch/bosch-bno055-usb-stick/) 
-under Linux from `Python`. 
+under Linux from `python3`. 
 
 **Long version**: 
 `BNO055 USB Stick` comes with 
@@ -22,7 +22,7 @@ and stream data read.
 1. When plugged in on a Linux system, 
 the `BNO055 USB Stick` should appear 
 as `/dev/ttyACM*` device. 
-This device is presented as a so-called
+This device is a so-called
 [`cdc_acm`](https://www.keil.com/pack/doc/mw/USB/html/group__usbh__cdcacm_functions.html) 
 (communication device class), but let us leave 
 these details for now.
@@ -53,7 +53,7 @@ and `matplotlib` yourself,
 or use `environment.yml` to create conda environment
 with dependencies resolved (see below).
 
-Or read [**this**](./CONDA_README.md) conda how-to instead.
+For further details read [**this**](./CONDA_README.md) guide.
 
 ## Quick start
 
@@ -80,15 +80,15 @@ for packet in bno_usb_stick.recv_streaming_generator(num_packets=10):
 
 ## Prevent modem manager to capture serial device
 
-When plugging `bno_usb_stick` on Ubuntu, 
-usually the device is unavailable for the first 10-15 seconds,
-due to the fact that `ModemManager` process first
-tries to use the device.
+When plugging `bno_usb_stick` on Ubuntu,
+the device is unavailable for the first 10-15 seconds,
+due to the fact that `ModemManager` process 
+takes over and tries to use the device.
 
 To avoid this Ubuntu-specific behavior, 
 add an exception to the `udev` rules,
 s.t. the `ModemManager` ignores the `bno_usb_stick`.
-To do so, run the script:
+Run the script:
 
 `python disable_modem_manager_bno_usb_stick.py`
 
