@@ -1,60 +1,107 @@
-Python driver for BNO055 USB Stick
-==================================
+# BNO055 USB Stick Python driver
+
+**TL;DR:** *"Swiss army knife"* for using 
+[`BNO055 USB Stick`](https://eu.mouser.com/new/bosch/bosch-bno055-usb-stick/) 
+under Linux from `Python`. 
+
+**Long version**: 
+`BNO055 USB Stick` comes with 
+[`Development Desktop 2.0`](https://www.bosch-sensortec.com/bst/support_tools/downloads/overview_downloads) 
+software package, 
+which unfortunately available for Windows only. 
+
+If you have a `BNO055 USB Stick` and want to
+use it on a Linux platform 
+(e.g. Ubuntu, Raspbian, Yocto, etc.) 
+this repo provides you with a `python 3` driver,
+capable of reading / writing registers / burst read, 
+and stream data read.
+
+## OS Prerequisites
+
+1. When plugged in on a Linux system, 
+the `BNO055 USB Stick` should appear 
+as `/dev/ttyACM*` device. 
+This device is presented as a so-called
+[`cdc_acm`](https://www.keil.com/pack/doc/mw/USB/html/group__usbh__cdcacm_functions.html) 
+(communication device class), but let us leave 
+these details for now.
+
+2. Your Linux user must be a member of the
+`dialout` group 
+(e.g. see this [thread](https://unix.stackexchange.com/questions/14354/read-write-to-a-serial-port-without-root))
+to be able to read/write `ttyACM*` devices 
+without root privileges.
+
+3. `udev` is installed on the system.
+We do autodetect the USB stick by relying on information from
+udev.
+
+
+## Supported Python version
+
+**python v3.6+**
+
+## Python dependencies
 
 **TL;DR:** install 
 (i) `pyserial`, 
 (ii) `pyudev`,
-(iii) `numpy`, and
-(iv) `pyquaternion`
-(optionally `matplotlib` for visualization).
+(iii) `dataclasses` (if using `python3.6`), and
+(iv) optionally: `pyquaternion` 
+and `matplotlib` yourself, 
+or use `environment.yml` to create conda environment
+with dependencies resolved (see below).
 
-**Long Version:**
-In order to get all the dependencies in place 
-for the python packages we use the `conda` environment
-in this project.
+Or read [**this**](./CONDA_README.md) conda how-to instead.
 
-[Miniconda](https://conda.io/miniconda.html) (for `python-3.6`)
-is a cross-platform package manager that allows managing
-dependencies and creates a corresponding python *environment*. 
+## Quick start
 
-0) Install [miniconda](https://conda.io/miniconda.html)
+Read register:
 
-1) Create the `bno055-usb-stick` environment:
-`
-conda env create -f environment.yml
-`
+```python
+from bno055_usb_stick import BnoUsbStick
 
-2) Update the `bno055-usb-stick` environment:
-`
-conda-env update -n bno055-usb-stick -f environment.yml
-`
+bno_usb_stick = BnoUsbStick()
+reg_val = bno_usb_stick.read_register(0x00)
+print(f"bno addr: {0x00}, value: {reg_val}")
+```
 
-3) Activate the `bno055-usb-stick` environment:
+Get 10 packets in streaming mode:
 
-Mac and Linux:
-`
-source activate bno055-usb-stick
-`
+```python
+from bno055_usb_stick import BnoUsbStick
 
-4) Remove the `bno055-usb-stick` environment 
-(delete the corresponding python packages):
-`
-conda env remove --name bno055-usb-stick
-`
+bno_usb_stick = BnoUsbStick()
+bno_usb_stick.activate_streaming()
+for packet in bno_usb_stick.recv_streaming_generator(num_packets=10):
+    print(f"bno data: {packet}")
+```
 
-# Prevent modem manager to capture serial device
+## Prevent modem manager to capture serial device
 
-When plugging `bno_usb_stick` on Ubuntu, we observed
-that the device was unavailable for the first 10 seconds
-or so, due to the fact that `ModemManager` process first
+When plugging `bno_usb_stick` on Ubuntu, 
+usually the device is unavailable for the first 10-15 seconds,
+due to the fact that `ModemManager` process first
 tries to use the device.
 
-What we need, is to add an exception to the `udev` rules,
+To avoid this Ubuntu-specific behavior, 
+add an exception to the `udev` rules,
 s.t. the `ModemManager` ignores the `bno_usb_stick`.
 To do so, run the script:
 
 `python disable_modem_manager_bno_usb_stick.py`
 
-The script requires root priviledges. Essentially it copies 
+The script requires root privileges. Essentially it copies 
 the `97-ttyacm.rules` file to `/etc/udev/rules.d` and reloads the 
 udev rules.
+
+## Maintainer
+
+[Dr. Konstantin Selyunin](http://selyunin.com/), 
+for suggestions / questions / comments 
+please contact: 
+selyunin [dot] k [dot] v [at] gmail [dot] com
+
+
+
