@@ -1,47 +1,60 @@
-BNO055 USB Stick Linux driver
-=============================
+Python driver for BNO055 USB Stick
+==================================
 
-**TL;DR:** *"Swiss army knife"* for using `BNO055 USB Stick` in Linux from 
-`Python`, `C++`, or `C`. 
+**TL;DR:** install 
+(i) `pyserial`, 
+(ii) `pyudev`,
+(iii) `numpy`, and
+(iv) `pyquaternion`
+(optionally `matplotlib` for visualization).
 
-**Long version**: 
-`BNO055 USB Stick` comes with 
-`Development Desktop 2.0` software, 
-which runs in Windows only. 
+**Long Version:**
+In order to get all the dependencies in place 
+for the python packages we use the `conda` environment
+in this project.
 
-If you have a `BNO055 USB Stick` and want to
-use it on a Linux platform 
-(e.g. Ubuntu, Raspbian, Yocto, etc.) 
-this repo provides you with 
-everything you need.
+[Miniconda](https://conda.io/miniconda.html) (for `python-3.6`)
+is a cross-platform package manager that allows managing
+dependencies and creates a corresponding python *environment*. 
 
-## Prerequisites
+0) Install [miniconda](https://conda.io/miniconda.html)
 
-1. When plugged in on a Linux system, 
-the `BNO055 USB Stick` should appear 
-as `/dev/ttyACM*` device. 
+1) Create the `bno055-usb-stick` environment:
+`
+conda env create -f environment.yml
+`
 
-2. Your Linux user must be a member of
-`dialout` group 
-(e.g. see this [thread](https://unix.stackexchange.com/questions/14354/read-write-to-a-serial-port-without-root))
-to be able to read/write without root privileges.
+2) Update the `bno055-usb-stick` environment:
+`
+conda-env update -n bno055-usb-stick -f environment.yml
+`
 
-3. `udev` is installed on the system 
+3) Activate the `bno055-usb-stick` environment:
 
-## Supported Languages 
+Mac and Linux:
+`
+source activate bno055-usb-stick
+`
 
-1. Python (v3.6)
-2. C++ 
-3. C
+4) Remove the `bno055-usb-stick` environment 
+(delete the corresponding python packages):
+`
+conda env remove --name bno055-usb-stick
+`
 
+# Prevent modem manager to capture serial device
 
-## Maintainer
+When plugging `bno_usb_stick` on Ubuntu, we observed
+that the device was unavailable for the first 10 seconds
+or so, due to the fact that `ModemManager` process first
+tries to use the device.
 
-[Konstantin Selyunin](http://selyunin.com/), 
-for suggestions / questions / comments 
-please contact: 
-selyunin [dot] k [dot] v [at] gmail [dot] com
+What we need, is to add an exception to the `udev` rules,
+s.t. the `ModemManager` ignores the `bno_usb_stick`.
+To do so, run the script:
 
+`python disable_modem_manager_bno_usb_stick.py`
 
-
-
+The script requires root priviledges. Essentially it copies 
+the `97-ttyacm.rules` file to `/etc/udev/rules.d` and reloads the 
+udev rules.
