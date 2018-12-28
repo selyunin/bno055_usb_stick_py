@@ -1,5 +1,7 @@
 # BNO055 USB Stick Python driver
 
+[![PyPI version](https://badge.fury.io/py/bno055-usb-stick-py.svg)](https://badge.fury.io/py/bno055-usb-stick-py)
+
 **TL;DR:** *"Swiss army knife"* for using 
 [`BNO055 USB Stick`](https://eu.mouser.com/new/bosch/bosch-bno055-usb-stick/) 
 under Linux from `python3`. 
