@@ -1,0 +1,3 @@
+dist/*
+build/*
+bno055_usb_stick_py.egg-info/*
