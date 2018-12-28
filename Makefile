@@ -4,6 +4,7 @@ BUILD=build
 
 all:
 	python3 setup.py sdist bdist_wheel
+	twine upload dist/*
 
 clean:
 	rm  -rf ${TARGET_EGG_INFO} ${DIST} ${BUILD}
