@@ -41,7 +41,20 @@ class BNO055:
     euler_resolution: float = 1. / 16.
 
     def __init__(self):
-        pass
+        self.a_raw = (0, 0, 0)
+        self.g_raw = (0, 0, 0)
+        self.m_raw = (0, 0, 0)
+        self.euler_raw = (0, 0, 0)
+        self.quaternion_raw = (0, 0, 0)
+        self.lin_a_raw = (0, 0, 0)
+        self.gravity_raw = (0, 0, 0)
+        self.temp = 0
+        self.calib_stat = 0
+        self.st_result = 0
+        self.int_sta = 0
+        self.sys_clk_status = 0
+        self.sys_status = 0
+        self.apply_resolution()
 
     def apply_resolution(self):
         self.a = tuple(el * self.acceleration_resolution for el in self.a_raw)
@@ -52,7 +65,3 @@ class BNO055:
         self.gravity = tuple(el * self.gravity_resolution for el in self.gravity_raw)
         self.euler = tuple(el * self.euler_resolution for el in self.euler_raw)
 
-
-if __name__ == "__main__":
-    # example client
-    pass

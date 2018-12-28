@@ -8,9 +8,9 @@ import re
 import pyudev
 import serial
 import time
-from typing import Dict, List, Tuple
+from typing import Tuple
 
-from bno055 import BNO055
+from src.bno055 import BNO055
 
 
 class BnoException(Exception):
