@@ -13,9 +13,11 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/selyunin/bno055_usb_stick_py",
-    packages=setuptools.find_packages(),
+    packages=["bno055_usb_stick_py"],
     requires=["pyudev", "pyserial", "dataclasses"],
-    data_files=['bno055_usb_stick_py/97-ttyacm.rules', 'bno055_usb_stick_py/bno055.json'],
+    install_requires=["pyserial", "pyudev", "dataclasses"],
+    package_dir={'bno055_usb_stick_py': 'bno055_usb_stick_py'},
+    package_data={"bno055_usb_stick_py": ['97-ttyacm.rules', 'bno055.json']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
