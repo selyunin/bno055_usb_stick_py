@@ -57,7 +57,9 @@ pip install bno055_usb_stick_py
 (iii) `dataclasses` (if using `python3.6`), and
 (iv) optionally: `pyquaternion` 
 and `matplotlib`, 
-or use `environment.yml` to create conda environment
+or use 
+[`environment.yml`](./environment.yml)
+to create conda environment
 with dependencies resolved.
 
 For further details regarding creating `conda` senvironment read [**this**](./CONDA_HOWTO.md) guide.
