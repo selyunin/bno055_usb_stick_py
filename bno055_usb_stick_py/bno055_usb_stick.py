@@ -10,7 +10,7 @@ import serial
 import time
 from typing import Tuple
 
-from src.bno055 import BNO055
+from bno055_usb_stick_py.bno055 import BNO055
 
 
 class BnoException(Exception):
