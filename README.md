@@ -4,15 +4,14 @@
 [`BNO055 USB Stick`](https://eu.mouser.com/new/bosch/bosch-bno055-usb-stick/) 
 under Linux from `python3`. 
 
-**Long version**: 
 `BNO055 USB Stick` comes with 
 [`Development Desktop 2.0`](https://www.bosch-sensortec.com/bst/support_tools/downloads/overview_downloads) 
 software package, 
-which unfortunately available for Windows only. 
+which is available for Windows only. 
 
 If you have a `BNO055 USB Stick` and want to
 use it on a Linux platform 
-(e.g. Ubuntu, Raspbian, Yocto, etc.) 
+(e.g. Ubuntu, Raspbian, Yocto, Suse, etc.) 
 this repo provides you with a `python 3` driver,
 capable of reading / writing registers / burst read, 
 and stream data read.
@@ -37,6 +36,12 @@ without root privileges.
 We do autodetect the USB stick by relying on information from
 udev.
 
+## Installation
+
+```sh
+pip install bno055_usb_stick_py
+```
+
 
 ## Supported Python version
 
@@ -49,11 +54,11 @@ udev.
 (ii) `pyudev`,
 (iii) `dataclasses` (if using `python3.6`), and
 (iv) optionally: `pyquaternion` 
-and `matplotlib` yourself, 
+and `matplotlib`, 
 or use `environment.yml` to create conda environment
-with dependencies resolved (see below).
+with dependencies resolved.
 
-For further details read [**this**](./CONDA_README.md) guide.
+For further details regarding creating `conda` senvironment read [**this**](./CONDA_HOWTO.md) guide.
 
 ## Quick start
 
@@ -64,7 +69,7 @@ from bno055_usb_stick import BnoUsbStick
 
 bno_usb_stick = BnoUsbStick()
 reg_val = bno_usb_stick.read_register(0x00)
-print(f"bno addr: {0x00}, value: {reg_val}")
+print(f"bno chip id addr: {0x00}, value: {reg_val}")
 ```
 
 Get 10 packets in streaming mode:
