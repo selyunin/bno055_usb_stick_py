@@ -116,12 +116,12 @@ class BnoUsbStick:
         else:
             return False, bytes()
 
-    def send_recv(self, packet: bytearray, params: dict = {}) -> Tuple[bool, bytes]:
+    def send_recv(self, packet: bytearray, params: dict = {}, recv_required=True) -> Tuple[bool, bytes]:
         send_ok = self.send(packet, params)
         if not send_ok:
             raise BnoException("Sending packet failed!")
         recv_ok, recv_data = self.recv()
-        if not recv_ok:
+        if not recv_ok and recv_required:
             raise BnoException("Receiving packet failed!")
         return True, recv_data
 
@@ -357,7 +357,7 @@ class BnoUsbStick:
         commands_sequence = self.bno_config['start_streaming']
         for command in commands_sequence:
             params = {}
-            ok, _ = self.send_recv(bytearray(command), params)
+            ok, _ = self.send_recv(bytearray(command), params, recv_required=False)
 
     def deactivate_streaming(self):
         commands_sequence = self.bno_config['stop_streaming']
