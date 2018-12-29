@@ -35,8 +35,4 @@ def disable_modem_manager_bno():
 
 
 if __name__ == '__main__':
-    if prompt_sudo() != 0:
-        print("ERROR: User should have root privileges! script will *NOT* be executed, exit")
-        exit(1)
-    copy_rules_to_udev()
-    reload_udev_rules()
+    disable_modem_manager_bno()
