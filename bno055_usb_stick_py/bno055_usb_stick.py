@@ -37,6 +37,11 @@ class BnoUsbStick:
             self.autodetect()
         self.connect()
 
+    def __del__(self):
+        if self.port is not None and self.port.is_open:
+            self.deactivate_streaming()
+        self.disconnect()
+
     @staticmethod
     def read_bno_json_config(file):
         if not file:
@@ -87,6 +92,7 @@ class BnoUsbStick:
         self.connect()
 
     def __exit__(self):
+        self.deactivate_streaming()
         self.disconnect()
 
     def send(self, command: bytearray, params: dict = {}) -> bool:
@@ -276,7 +282,6 @@ class BnoUsbStick:
             yield self.recv_streaming_packet()
             packets_received += 1
 
-
     def decode_streaming(self):
         self.payload = self.buffer[5:-2]
         a_x = self.pop_bytes(num_bytes=2, byteorder='little', signed=True)
@@ -382,7 +387,6 @@ def check_bno_chip_id(bno: BnoUsbStick):
 if __name__ == "__main__":
     # example client code
     bno_usb_stick = BnoUsbStick()
-    bno_usb_stick.deactivate_streaming()
     bno_usb_stick.query_board_info()
     print(f"r_00: 0x{bno_usb_stick.read_register(0x00):02X}")
     print(f"r_01: 0x{bno_usb_stick.read_register(0x01):02X}")
