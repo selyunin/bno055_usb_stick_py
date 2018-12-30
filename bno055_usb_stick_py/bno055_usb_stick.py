@@ -218,7 +218,6 @@ class BnoUsbStick:
 
     def decode_burst_read(self, start_reg_addr, num_bytes):
         """
-
         :param start_reg_addr:
         :param num_bytes:
         :return:
@@ -250,7 +249,9 @@ class BnoUsbStick:
         :raises: BnoException if packet length, start, or stop bytes are not met
         """
         if len(self.buffer) != 0x38:
-            raise BnoException(f"Streaming packet length does not match, expected: 0x38, got {len(self.buffer)}")
+            while len(self.buffer) != 0x38:
+                # pop all the packets from serial buffer
+                self.recv()
         start_byte = 0xAA
         stop_bytes = bytes([13, 10])
         packet_start_idx = self.buffer.find(start_byte)
