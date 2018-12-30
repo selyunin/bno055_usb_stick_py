@@ -138,7 +138,7 @@ is an object of `BNO055` data class (from `bno055.py`) file.
 `BNO055` data class has the following fields:
 
 ```python
-from bno055_usb_stick_py.bno055 import BNO055
+from bno055_usb_stick_py import BNO055
 bno_data = BNO055()
 bno_data.a_raw  # raw accelerometer data (a_raw_x, a_raw_y, a_raw_z)
 bno_data.g_raw  # raw gyro data (g_raw_x, g_raw_y, g_raw_z)
