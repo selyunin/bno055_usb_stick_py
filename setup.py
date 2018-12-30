@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bno055_usb_stick_py",
-    version="0.9.3",
+    version="0.9.5",
     author="Dr. Konstantin Selyunin",
     author_email="selyunin.k.v@gmail.com",
     license="MIT",
