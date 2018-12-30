@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Author: Dr. Konstantin Selyunin
+# License: MIT
+
 import json
 import os
 import os.path

@@ -1,5 +1,8 @@
 from bno055_usb_stick_py import BnoUsbStick
 
+# Author: Dr. Konstantin Selyunin
+# License: MIT
+
 
 def example_register_read():
     bno_usb_stick = BnoUsbStick()

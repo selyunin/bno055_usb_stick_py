@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Author: Dr. Konstantin Selyunin
+# License: MIT
+
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Any
 

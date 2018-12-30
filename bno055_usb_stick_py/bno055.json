@@ -1,4 +1,6 @@
 {
+  "author": "Dr. Konstantin Selyunin",
+  "license": "MIT",
   "udev": {
     "ID_MODEL": "Bosch_Sensortec_BNO_stick",
     "ID_VENDOR": "Bosch_Sensortec"

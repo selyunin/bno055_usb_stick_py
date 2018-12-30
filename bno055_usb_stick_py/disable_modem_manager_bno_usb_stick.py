@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+
+# Author: Dr. Konstantin Selyunin
+# License: MIT
+
 import os
 import os.path
 import subprocess
-
-from shutil import copy
 
 
 def prompt_sudo():
