@@ -120,6 +120,46 @@ for _ in range(100):
     print(f"{packet}")
 ```
 
+Receive infinite number of packets (in case you wait infinite time :wink: ):
+
+```python
+from bno055_usb_stick_py import BnoUsbStick
+bno_usb_stick = BnoUsbStick()
+bno_usb_stick.activate_streaming()
+for packet in bno_usb_stick.recv_streaming_generator():
+    print(f"{packet}")
+```
+
+## Bno USB Stick Data Packet
+
+When receiving data in streaming mode, the result 
+is an object of `BNO055` data class (from `bno055.py`) file.
+
+```python
+from bno055_usb_stick_py.bno055 import BNO055
+bno_data = BNO055()
+bno_data.a_raw  # raw accelerometer data (a_raw_x, a_raw_y, a_raw_z)
+bno_data.g_raw  # raw gyro data (g_raw_x, g_raw_y, g_raw_z)
+bno_data.m_raw  # raw magnetometer data (m_raw_x, m_raw_y, m_raw_z)
+bno_data.euler_raw  # raw euler angles (heading, roll, pitch)
+bno_data.quaternion_raw  # raw quaternion data (q_raw_w, q_raw_x, q_raw_y, q_raw_z)
+bno_data.lin_a_raw  # raw linear acceleration data (lin_a_raw_x, lin_a_raw_y, lin_a_raw_z)
+bno_data.gravity_raw  # raw gravity vector (gravity_raw_x, gravity_raw_y, gravity_raw_z)
+bno_data.a  # accelerometer (a_x, a_y, a_z)
+bno_data.g  # gyroscope (g_x, g_y, g_z)
+bno_data.m  # magnetometer (m_x, m_y, m_z)
+bno_data.euler  # euler angler (heading, roll, pitch)
+bno_data.quaternion  # quaternion values (q_w, q_x, q_y, q_z)
+bno_data.lin_a  # linear acceleration (lin_a_x, lin_a_y, lin_a_z)
+bno_data.gravity  # gravity vector (gravity_x, gravity_y, gravity_z)
+bno_data.temp  # temperature register
+bno_data.calib_stat  # calibration status (addr 0x35) register
+bno_data.st_result  # status result (addr 0x36) register
+bno_data.int_sta  # interrupt status (addr 0x37) register
+bno_data.sys_clk_status  # system clock status (addr 0x38) register
+bno_data.sys_status  # system status (addr 0x39) register
+```
+
 ## Prevent modem manager to capture serial device
 
 When plugging `bno_usb_stick` on Ubuntu,
