@@ -45,7 +45,7 @@ class BNO055:
         self.g_raw = (0, 0, 0)
         self.m_raw = (0, 0, 0)
         self.euler_raw = (0, 0, 0)
-        self.quaternion_raw = (0, 0, 0)
+        self.quaternion_raw = (0, 0, 0, 0)
         self.lin_a_raw = (0, 0, 0)
         self.gravity_raw = (0, 0, 0)
         self.temp = 0
