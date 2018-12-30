@@ -62,7 +62,7 @@ or use
 to create conda environment
 with dependencies resolved.
 
-For further details regarding creating `conda` senvironment read [**this**](./CONDA_HOWTO.md) guide.
+For further details regarding creating `conda` environment read [**this**](./CONDA_HOWTO.md) guide.
 
 ## Quick start
 
