@@ -135,6 +135,8 @@ for packet in bno_usb_stick.recv_streaming_generator():
 When receiving data in streaming mode, the result 
 is an object of `BNO055` data class (from `bno055.py`) file.
 
+`BNO055` data class has the following fields:
+
 ```python
 from bno055_usb_stick_py.bno055 import BNO055
 bno_data = BNO055()
