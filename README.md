@@ -41,7 +41,7 @@ udev.
 ## Installation
 
 ```sh
-pip install bno055_usb_stick_py
+pip install bno055-usb-stick-py
 ```
 
 
