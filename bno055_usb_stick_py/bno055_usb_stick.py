@@ -253,6 +253,7 @@ class BnoUsbStick:
         """
         if len(self.buffer) != 0x38:
             while len(self.buffer) != 0x38:
+                time.sleep(0.01)
                 # pop all the packets from serial buffer
                 self.recv()
         start_byte = 0xAA
