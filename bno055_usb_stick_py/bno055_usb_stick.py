@@ -7,9 +7,8 @@ import json
 import os
 import os.path
 import re
-
-import pyudev
 import serial
+import platform
 import time
 from typing import Tuple
 
@@ -68,6 +67,24 @@ class BnoUsbStick:
         return params.index(reg_addr_entry)
 
     def autodetect(self):
+        system = platform.system().lower()
+        if system == 'windows':
+            self.autodetect_windows()
+        else:
+            self.autodetect_linux()
+    
+    def autodetect_windows(self):
+        from serial.tools.list_ports import comports
+        com_ports = comports()
+        for port in com_ports:
+            if port.vid == 5418 and port.pid == 32961:
+                self.port_name = port.name
+                return True
+        else:
+            raise BnoException('BNO USB Stick not detected!')
+
+    def autodetect_linux(self):
+        import pyudev
         context = pyudev.Context()
         for device in context.list_devices(subsystem='tty'):
             device_udev_values = {}
