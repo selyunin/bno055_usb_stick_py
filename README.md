@@ -4,7 +4,7 @@
 
 **TL;DR:** *"Swiss army knife"* for using 
 [`BNO055 USB Stick`](https://eu.mouser.com/new/bosch/bosch-bno055-usb-stick/) 
-under Linux from `python3`. 
+under Linux / Windows from `python3`. 
 
 `BNO055 USB Stick` comes with 
 [`Development Desktop 2.0`](https://www.bosch-sensortec.com/bst/support_tools/downloads/overview_downloads) 
@@ -12,13 +12,15 @@ software package,
 which is available for Windows only. 
 
 If you have a `BNO055 USB Stick` and want to
-use it on a Linux platform 
+use it on a Linux platform (or Windows without **Development Desktop**)
 (e.g. Ubuntu, Raspbian, Yocto, Suse, etc.) 
 this repo provides you with a `python 3` driver,
 capable of reading / writing registers / burst read, 
 and stream data read.
 
 ## OS Prerequisites
+
+### Linux
 
 1. When plugged in on a Linux system, 
 the `BNO055 USB Stick` should appear 
@@ -34,9 +36,19 @@ these details for now.
 to be able to read/write `ttyACM*` devices 
 without root privileges.
 
-3. `udev` is installed on the system.
-We do autodetect the USB stick by relying on information from
-udev.
+3. `udev` is installed on the Linux system.
+We do autodetect the USB stick by relying on information from udev.
+
+### Windows
+
+When doing autodetect on Windows, we rely on the **vid** (vendor ID) and **pid** (product ID).
+If these are different for your stick, then you want to create the object using the `port` argument directly,
+similar to the following:
+
+```python
+from bno055_usb_stick_py import BnoUsbStick
+bno_usb_stick = BnoUsbStick(port='COM3')
+```
 
 ## Installation
 
