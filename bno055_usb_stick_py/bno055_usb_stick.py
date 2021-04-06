@@ -93,8 +93,8 @@ class BnoUsbStick:
             if device_udev_values == self.bno_udev_config:
                 self.port_name = device.device_node
                 return True
-            else:
-                raise BnoException("BNO USB Stick not detected!")
+        else:
+            raise BnoException("BNO USB Stick not detected!")
 
     def connect(self):
         if self.port is None or not self.port.is_open:
